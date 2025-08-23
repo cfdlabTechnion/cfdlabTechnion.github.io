@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>2. Image Fitting</title>
+  <style>
+    html, body { margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background:#fff; color:#333; }
+    h2 { text-align: center; margin: 0 0 12px; font-size: 1.5rem; line-height: 1.25; font-weight: 700; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+    /* Thin centered rule like the BibTeX one */
+    .section-hr { max-width: 1200px; margin: 0 auto 24px; border: 0; height: 1px; background: #e5e5e5; }
+
+    /* Reproducibility section */
+    .repro{ max-width:1120px; margin:40px auto 0; padding:16px 20px; border:1px solid #e5e5e5; border-radius:10px; background:#fafafa; }
+    .repro h3{ margin:0 0 8px; text-align:center; color:#444; }
+    .repro p{ margin:0; font-size:14px; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <section class="wrap">
+    <h2>2. Image Fitting</h2>
+    <hr class="section-hr" aria-hidden="true" />
+    <img
+      src="./multimedia_files/image_cats.png"
+      alt="Image fitting result"
+      loading="lazy"
+      decoding="async"
+    />
+  </section>
+
+  <!-- Reproducibility details -->
+  <section class="repro" aria-labelledby="repro-heading">
+    <p>
+      For a fixed target signal, the PSNR gain from our initialization used in SIREN<sup>2</sup> increases with parameter count; that's why, with the same network, grayscale training yields a larger percentage PSNR improvement than RGB. <strong>Reproducibility details.</strong> We fit a 300&times;300 gray image for 100 epochs using baseline SIREN with &omega;<sub>0</sub>=3000 and SIREN<sup>2</sup> with four hidden layers of 256 features each. Optimization uses Adam with an initial learning rate 1e-4 that decays by 0.2% every 20 epochs. It took 0.8 seconds to train each image on an NVIDIA L40s GPU (48GB).
+    </p>
+  </section>
+
+  <section class="wrap">
+    <p>More experiments in the paper.</p>
+  </section>
+</body>
+</html>

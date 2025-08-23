@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spectral Bottleneck in Deep Neural Networks</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2rem;
+      text-align: center;
+    }
+    .buttons a {
+      margin: 0.3rem;
+    }
+    .figure-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    .abstract {
+      max-width: 1200px;
+      margin: 2rem auto;
+      text-align: left;
+    }
+
+    .waveform-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .wave-box {
+      width: 300px;
+    }
+
+    .vote-button {
+      font-size: 16px;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .vote-button:hover {
+      background-color: #0056b3;
+    }
+  
+    html { scroll-behavior: smooth; }
+    .bibtex-section { max-width: 900px; margin: 3rem auto; text-align: left; }
+    .bibtex-title { text-align: center; margin-bottom: 0.75rem; }
+    .bibtex-hr { margin: 0 auto 1rem; max-width: 900px; }
+    .bibtex-box { background: #f6f6f6; padding: 1rem 1.25rem; border-radius: 8px; overflow-x: auto; }
+    pre.bibtex-box { margin: 0; }
+    </style>
+</head>
+<body>
+
+  <h1>Spectral Bottleneck in Deep Neural Networks: Noise is All You Need</h1>
+  <p><strong>Preprint under review | v1:2025</strong></p>
+  <p style="font-size: 1.2em;">
+  Hemanth Chandravamsi, Dhanush V. Shenoy, Itay Zinn, Shimon Pisnoy, Steven H. Frankel
+  </p>
+  <p><i>
+    Technion - Israel Institute of Technology, Haifa, Israel, 3200003
+  </i></p>
+
+  <div class="buttons">
+    <a class="btn btn-primary" href="#">Paper</a>
+    <a class="btn btn-primary" href="#">Code</a>
+    <a class="btn btn-primary" href="#">Google Colab</a>
+    <a class="btn btn-primary" href="#bibtex">Cite</a>
+  </div>
+
+  <div class="figure-grid mt-4">
+    <img src="fig1.png" alt="Error maps" style="max-width: 1200px;">
+  </div>
+
+  <div class="abstract">
+    <h2>Abstract</h2>
+    <p>
+      Deep neural networks are known to exhibit a spectral learning bias, wherein low-frequency components are learned early in the training, while high-frequency modes emerge more gradually in the later epochs. However, when the target signal lacks low-frequency components and is dominated by broadband high frequencies, training suffers from a <em>spectral bottleneck</em>. As a result, the model fails to reconstruct the entire signal, including the frequency components that lie within its representational capacity. We examine such a scenario in the context of implicit neural representation networks (INRs), focusing on the challenge of fitting high-frequency-dominant signals that are susceptible to spectral bottleneck. To address this, we propose a generalized target-aware <em>weight perturbation scheme</em> for network initialization. The scheme perturbs uniformly initialized network weights with broadband Gaussian noise, broadening the spectral profile of activations at initialization. The proposed approach not only addresses the spectral bottleneck, but also improves the accuracy of INRs, outperforming state-of-the-art methods in audio fitting and achieving notable gains in image fitting and denoising. Beyond signal reconstruction, our approach opens new directions for adaptive initialization strategies in neural representation tasks, particularly those requiring fine-scale detail.
+    </p>
+  </div>
+
+
+<iframe
+  src="audio_block1.html"
+  width="100%"
+ 
+  loading="lazy"
+  style="display:block;margin:0 auto;border:none">
+</iframe>
+<iframe
+  src="image_block.html"
+  width="100%"
+ 
+ 
+  loading="lazy"
+  style="display:block;margin:0 auto;border:none">
+</iframe>
+
+<div id="bibtex" class="bibtex-section">
+  <h2 class="bibtex-title">Bibtex</h2>
+  <hr class="bibtex-hr"/>
+  <pre class="bibtex-box"><code>@misc{chandravamsi2025spectral_bottleneck,
+  title        = {Spectral Bottleneck in Deep Neural Networks: Noise is All You Need},
+  author       = {Chandravamsi, Hemanth and Shenoy, Dhanush V. and Zinn, Itay and Pisnoy, Shimon and Frankel, Steven H.},
+  year         = {2025},
+  note         = {Preprint under review}
+}</code></pre>
+</div>
+
+
+<script>
+  (function() {
+    function resizeIframe(iframe) {
+      try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+        var h = Math.max(
+          doc.body ? doc.body.scrollHeight : 0,
+          doc.documentElement ? doc.documentElement.scrollHeight : 0
+        );
+        if (h && h !== parseInt(iframe.style.height, 10)) {
+          iframe.style.height = h + "px";
+        }
+      } catch (e) {}
+    }
+    function setup() {
+      var iframes = document.querySelectorAll('iframe[src$="audio_block1.html"], iframe[src$="image_block.html"]');
+      iframes.forEach(function(f) {
+        f.addEventListener("load", function() {
+          resizeIframe(f);
+          try {
+            var doc = f.contentDocument || f.contentWindow.document;
+            if (!doc) return;
+            var ro = new ResizeObserver(function(){ resizeIframe(f); });
+            ro.observe(doc.documentElement);
+            ro.observe(doc.body);
+          } catch(e) {}
+        });
+        resizeIframe(f);
+      });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setup);
+    } else { setup(); }
+  })();
+</script>
+
+</body>
+</html>
+

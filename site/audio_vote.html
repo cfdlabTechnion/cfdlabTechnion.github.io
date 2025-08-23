@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Audio Vote</title>
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 40px;
+    }
+
+    .waveform-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .wave-box {
+      width: 300px;
+    }
+
+    .vote-button {
+      font-size: 16px;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .vote-button:hover {
+      background-color: #0056b3;
+    }
+
+    .gt {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #28a745;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .gt:hover,
+    .gt:focus {
+      background-color: #1e7e34; /* darker green */
+      outline: none;
+    }
+
+    .play-pause-button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .play-pause-button:hover,
+    .play-pause-button:focus {
+      background-color: #0056b3;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Which one sounds like the 'ground truth'?</h2>
+  <form id="voteForm">
+    <div class="waveform-container">
+      <div class="wave-box">
+        <!-- Initially hidden empty placeholder box above ground truth -->
+        <p id="network1" style="display:none; margin-bottom: 8px; height: 1.2em;"></p>
+        <div id="waveform1"></div>
+        <button type="button" class="gt" onclick="wavesurfer1.playPause()">Play/Pause - Ground truth</button>
+      </div>
+
+      <div class="wave-box">
+        <p id="network2" style="display:none; margin-bottom: 8px;"></p>
+        <div id="waveform2"></div>
+        <button type="button" class="play-pause-button" onclick="wavesurfer2.playPause()">Play/Pause</button>
+        <label style="display: block; margin-top: 10px; cursor: pointer;">
+          <input type="radio" name="vote" value="audio2" style="margin-right: 8px;">
+          Choose Audio 1
+        </label>
+      </div>
+
+      <div class="wave-box">
+        <p id="network3" style="display:none; margin-bottom: 8px;"></p>
+        <div id="waveform3"></div>
+        <button type="button" class="play-pause-button" onclick="wavesurfer3.playPause()">Play/Pause</button>
+        <label style="display: block; margin-top: 10px; cursor: pointer;">
+          <input type="radio" name="vote" value="audio3" style="margin-right: 8px;">
+          Choose Audio 2
+        </label>
+      </div>
+
+      <div class="wave-box">
+        <p id="network4" style="display:none; margin-bottom: 8px;"></p>
+        <div id="waveform4"></div>
+        <button type="button" class="play-pause-button" onclick="wavesurfer4.playPause()">Play/Pause</button>
+        <label style="display: block; margin-top: 10px; cursor: pointer;">
+          <input type="radio" name="vote" value="audio4" style="margin-right: 8px;">
+          Choose Audio 3
+        </label>
+      </div>
+    </div>
+    <button type="submit" class="vote-button">Submit and reveal</button>
+  </form>
+
+  <script>
+    function initWaveSurfer(containerId, filePath, progressColor) {
+      const wavesurfer = WaveSurfer.create({
+        container: containerId,
+        waveColor: '#bbb',
+        progressColor: progressColor,
+        height: 80,
+        backend: 'MediaElement',
+        mediaControls: false
+      });
+
+      wavesurfer.load(filePath);
+      wavesurfer.on('error', (e) => {
+        console.error(`WaveSurfer error in ${containerId}`, e);
+        document.querySelector(containerId).innerHTML = `<p style="color:red">Error loading audio.</p>`;
+      });
+
+      return wavesurfer;
+    }
+
+    const wavesurfer1 = initWaveSurfer('#waveform1', 'multimedia_files/dilse_cropped1_gt.wav', '#28a745');
+    const wavesurfer2 = initWaveSurfer('#waveform2', 'multimedia_files/dilse_cropped2.wav', '#007bff');
+    const wavesurfer3 = initWaveSurfer('#waveform3', 'multimedia_files/dilse_cropped3.wav', '#007bff');
+    const wavesurfer4 = initWaveSurfer('#waveform4', 'multimedia_files/dilse_cropped18.wav', '#007bff');
+
+    const networkNames = {
+      audio2: "SIREN (PSNR: XX.X dB)",
+      audio3: "SIREN\u00B2 (PSNR: XX.X dB)",
+      audio4: "SOS-SIREN (PSNR: XX.X dB)"
+    };
+
+    document.getElementById('voteForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const vote = formData.get('vote');
+
+      if (!vote) {
+        alert("Please select an audio before voting.");
+        return;
+      }
+
+      // Reveal empty placeholder above ground truth to keep spacing
+      document.getElementById('network1').style.display = 'block';
+
+      // Reveal all network names
+      document.getElementById('network2').textContent = networkNames.audio2;
+      document.getElementById('network3').textContent = networkNames.audio3;
+      document.getElementById('network4').textContent = networkNames.audio4;
+
+      document.getElementById('network2').style.display = 'block';
+      document.getElementById('network3').style.display = 'block';
+      document.getElementById('network4').style.display = 'block';
+    });
+  </script>
+</body>
+</html>

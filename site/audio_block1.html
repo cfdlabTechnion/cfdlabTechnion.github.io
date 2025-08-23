@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Audio Fitting Comparison — lightweight</title>
+  <!-- Keep a single tiny dependency. Wavesurfer is deferred so it does not block paint. -->
+  <link rel="preconnect" href="https://unpkg.com" />
+  <script src="https://unpkg.com/wavesurfer.js" defer></script>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #222;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --ring: rgba(59,130,246,.15);
+      --wave: #d1d5db;
+      --progress: #2563eb;
+      --green: #16a34a;  /* GT */
+      --blue: #2563eb;   /* SIREN */
+      --orange: #ea580c; /* SIREN^2 */
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b0f14; --text:#f5f5f5; --muted:#9aa4b2; --card:#0f141a; --border:#1f2a37; --wave:#334155; }
+    }
+    *{ box-sizing:border-box }
+    body{ font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, "Apple Color Emoji","Segoe UI Emoji"; margin: 28px; background:var(--bg); color:var(--text); }
+    h2{ text-align:center; margin: 8px 0 20px; font-size: clamp(20px, 2.5vw, 28px); }
+
+    .row-title{ display:flex; justify-content:center; align-items:center; width:fit-content; gap:8px; margin:22px auto 12px; padding:6px 12px; border:1px solid var(--border); border-radius:999px; background:color-mix(in lab, var(--card) 92%, var(--border)); font-weight:600; color:var(--muted); text-align:center; }
+    .wavegrid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin: 0 auto 18px; max-width: 1120px; }
+
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow: 0 1px 0 rgba(0,0,0,.03); transition: box-shadow .2s ease; }
+    .card:focus-within{ outline: 2px solid var(--ring); outline-offset: 2px; }
+    .title{ text-align:center !important; margin:6px 0 10px; font-size:15px; color:#000 !important; font-weight:600; }
+
+    /* Clean, compact waveform */
+    .waveform{ position: relative; height:72px; border-radius:10px; overflow:hidden; background:
+      linear-gradient(90deg, var(--wave) 1px, transparent 1px) 0 100%/4px 100% no-repeat,
+      linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0));
+    }
+    /* Hide the injected <audio> so it cannot block or steal clicks */
+    .waveform audio{ display:none !important; visibility:hidden !important; }
+
+    .section-hr { max-width: 1200px; margin: 0 auto 24px; border: 0; height: 1px; background: #e5e5e5; }
+
+    /* Loading shimmer until we draw the canvas */
+    .waveform[data-state="idle"]::after{
+      content:""; position:absolute; inset:0; background:
+      linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: translateX(-100%); animation: shimmer 1.6s infinite;
+    }
+    @keyframes shimmer{ to{ transform: translateX(100%); } }
+
+    .card-footer{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; }
+    .psnr{ font-size:14px; color:var(--muted); font-weight:600; }
+
+    .btn{ display:inline-flex; align-items:center; justify-content:center; width:92px; height:34px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); cursor:pointer; font-weight:600; font-size:14px; transition: transform .06s ease, box-shadow .2s ease; }
+    .btn:hover{ box-shadow: 0 4px 18px rgba(0,0,0,.06) }
+    .btn:active{ transform: translateY(1px) }
+    .pill{ display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); font-size:12px; color:var(--muted); }
+
+    /* Reproducibility section */
+    .repro{ max-width:1120px; margin:40px auto 0; padding:16px 20px; border:1px solid #e5e5e5; border-radius:10px; background:#fafafa; }
+    .repro h3{ margin:0 0 8px; text-align:center; color:#444; }
+    .repro p{ margin:0; font-size:14px; line-height:1.6; color:#000; }
+  </style>
+</head>
+<body>
+  <h2>1. Audio Fitting (use 🎧)</h2>
+  <hr class="section-hr" aria-hidden="true" />
+
+  <!-- Row 1: Chopin -->
+  <div class="row-title"><span>Example 1 — Nocturne (Chopin)</span></div>
+  <div class="wavegrid">
+    <div class="card">
+      <p class="title">Ground Truth</p>
+      <div id="w1" class="waveform" data-src="multimedia_files/chopin_gt.wav" data-color="var(--green)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w1" aria-label="Play or pause Nocturne ground truth" aria-pressed="false">Play</button>
+        <span class="psnr"></span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title">SIREN</p>
+      <div id="w2" class="waveform" data-src="multimedia_files/chopin_SIREN.wav" data-color="var(--blue)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w2" aria-label="Play or pause Nocturne SIREN" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 23.9 dB</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title"><strong>SIREN<sup>2</sup> (present)</strong></p>
+      <div id="w3" class="waveform" data-src="multimedia_files/chopin_SIREN_square.wav" data-color="var(--orange)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w3" aria-label="Play or pause Nocturne SIREN squared" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 48.9 dB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Dil Se -->
+  <div class="row-title"><span>Example 2 — Dil Se</span></div>
+  <div class="wavegrid">
+    <div class="card">
+      <p class="title">Ground Truth</p>
+      <div id="w4" class="waveform" data-src="multimedia_files/dilse_gt.wav" data-color="var(--green)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w4" aria-label="Play or pause Dil Se ground truth" aria-pressed="false">Play</button>
+        <span class="psnr"></span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title">SIREN</p>
+      <div id="w5" class="waveform" data-src="multimedia_files/dilse_gt_SIREN.wav" data-color="var(--blue)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w5" aria-label="Play or pause Dil Se SIREN" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 31.0 dB</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title"><strong>SIREN<sup>2</sup> (present)</strong></p>
+      <div id="w6" class="waveform" data-src="multimedia_files/dilse_gt_SIREN_square.wav" data-color="var(--orange)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w6" aria-label="Play or pause Dil Se SIREN squared" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 41.1 dB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Vivaldi -->
+  <div class="row-title"><span>Example 3 — Vivaldi</span></div>
+  <div class="wavegrid">
+    <div class="card">
+      <p class="title">Ground Truth</p>
+      <div id="w10" class="waveform" data-src="multimedia_files/vivaldi_gt.wav" data-color="var(--green)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w10" aria-label="Play or pause Vivaldi ground truth" aria-pressed="false">Play</button>
+        <span class="psnr"></span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title">SIREN</p>
+      <div id="w11" class="waveform" data-src="multimedia_files/vivaldi_gt_SIREN.wav" data-color="var(--blue)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w11" aria-label="Play or pause Vivaldi SIREN" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 29.2 dB</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title"><strong>SIREN<sup>2</sup> (present)</strong></p>
+      <div id="w12" class="waveform" data-src="multimedia_files/vivaldi_gt_SIREN_square.wav" data-color="var(--orange)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w12" aria-label="Play or pause Vivaldi SIREN squared" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 39.5 dB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 4: Tetris (Sayori filenames) -->
+  <div class="row-title"><span>Example 4 — Tetris</span></div>
+  <div class="wavegrid">
+    <div class="card">
+      <p class="title">Ground Truth</p>
+      <div id="w7" class="waveform" data-src="multimedia_files/sayori_gt.wav" data-color="var(--green)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w7" aria-label="Play or pause Tetris ground truth" aria-pressed="false">Play</button>
+        <span class="psnr"></span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title">SIREN</p>
+      <div id="w8" class="waveform" data-src="multimedia_files/sayori_SIREN.wav" data-color="var(--blue)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w8" aria-label="Play or pause Tetris SIREN" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 13.4 dB</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="title"><strong>SIREN<sup>2</sup> (present)</strong></p>
+      <div id="w9" class="waveform" data-src="multimedia_files/sayori_SIREN_square.wav" data-color="var(--orange)" data-state="idle"></div>
+      <div class="card-footer">
+        <button class="btn" data-target="w9" aria-label="Play or pause Tetris SIREN squared" aria-pressed="false">Play</button>
+        <span class="psnr">PSNR 35.7 dB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reproducibility details -->
+  <section class="repro" aria-labelledby="repro-heading">
+    <p>
+      <b>Reproducibility details.</b> Each audio clip of length 150,000 samples is trained for 1000 epochs using the standard SIREN (first omega = 3000) and SIREN<sup>2</sup> comprising four hidden layers with 222 features each. Adam optimizer is used with a learning rate schedule that decays the learning rate by 1% every 20 epochs starting from a learning rate of 1e-4.
+    </p>
+  </section>
+
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Keep memory tiny. Create players only when needed (on view or on click).
+      const players = new Map();
+
+      const create = (el) => {
+        if (players.has(el.id)) return players.get(el.id);
+        const color = getComputedStyle(el).getPropertyValue('--progress') || el.dataset.color || '#2563eb';
+        const ws = WaveSurfer.create({
+          container: el,
+          height: 72,
+          waveColor: getComputedStyle(el).getPropertyValue('--wave') || '#d1d5db',
+          progressColor: el.dataset.color || color.trim(),
+          barWidth: 2,
+          barRadius: 2,
+          barGap: 1,
+          backend: 'MediaElement',
+          mediaControls: false,
+          partialRender: true,
+        });
+        ws.load(el.dataset.src);
+        el.dataset.state = 'loading';
+        ws.on('ready', () => { el.dataset.state = 'ready'; });
+        ws.on('play',  () => toggleButton(el.id, true));
+        ws.on('pause', () => toggleButton(el.id, false));
+        players.set(el.id, ws);
+        return ws;
+      };
+
+      const toggleButton = (id, playing) => {
+        const btn = document.querySelector(`.btn[data-target="${id}"]`);
+        if (!btn) return;
+        btn.textContent = playing ? 'Pause' : 'Play';
+        btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        if (playing) {
+          // Pause all others to keep CPU and sound sane
+          players.forEach((p, pid) => { if (pid !== id && p.isPlaying()) p.pause(); });
+        }
+      };
+
+      // Lazily instantiate when scrolled into view
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            io.unobserve(e.target);
+            create(e.target);
+          }
+        });
+      }, { rootMargin: '200px' });
+
+      document.querySelectorAll('.waveform').forEach((wf) => io.observe(wf));
+
+      // Create on-demand if user clicks before it scrolls into view
+      document.querySelectorAll('.btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.target;
+          const el = document.getElementById(id);
+          const ws = players.get(id) || create(el);
+          ws.playPause();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
