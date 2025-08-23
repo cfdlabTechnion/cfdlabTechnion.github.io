@@ -35,7 +35,7 @@
   <!-- Reproducibility details -->
   <section class="repro" aria-labelledby="repro-heading">
     <p>
-      For a fixed target signal, the PSNR gain from our initialization used in SIREN<sup>2</sup> increases with parameter count; that's why, with the same network, grayscale training yields a larger percentage PSNR improvement than RGB. <strong>Reproducibility details.</strong> We fit a 300&times;300 gray image for 100 epochs using baseline SIREN with &omega;<sub>0</sub>=3000 and SIREN<sup>2</sup> with four hidden layers of 256 features each. Optimization uses Adam with an initial learning rate 1e-4 that decays by 0.2% every 20 epochs. It took 0.8 seconds to train each image on an NVIDIA L40s GPU (48GB).
+      For a fixed target signal, the PSNR gain from our initialization scheme (used in SIREN<sup>2</sup>) increases with parameter count; that's why, with the same network, grayscale training yields a larger percentage PSNR improvement than RGB. <strong>Reproducibility details.</strong> We fit a 300&times;300 gray image for 100 epochs using baseline SIREN with &omega;<sub>0</sub>=3000 and SIREN<sup>2</sup> with four hidden layers of 256 features each. Optimization uses Adam with an initial learning rate 1e-4 that decays by 0.2% every 20 epochs. It took 0.8 seconds to train each image on an NVIDIA L40s GPU (48GB).
     </p>
   </section>
 
