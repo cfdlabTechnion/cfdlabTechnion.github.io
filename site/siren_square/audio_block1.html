@@ -34,6 +34,7 @@
     .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow: 0 1px 0 rgba(0,0,0,.03); transition: box-shadow .2s ease; }
     .card:focus-within{ outline: 2px solid var(--ring); outline-offset: 2px; }
     .title{ text-align:center !important; margin:6px 0 10px; font-size:15px; color:#000 !important; font-weight:600; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
 
     /* Clean, compact waveform */
     .waveform{ position: relative; height:72px; border-radius:10px; overflow:hidden; background:
@@ -188,7 +189,7 @@
   </div>
 
   <!-- Reproducibility details -->
-  <section class="repro" aria-labelledby="repro-heading">
+  <section class="wrap">
     <p>
       <b>Reproducibility details.</b> Each audio clip of length 150,000 samples is trained for 1000 epochs using the standard SIREN (first omega = 3000) and SIREN<sup>2</sup> comprising four hidden layers with 222 features each. Adam optimizer is used with a learning rate schedule that decays the learning rate by 1% every 20 epochs starting from a learning rate of 1e-4.
     </p>
